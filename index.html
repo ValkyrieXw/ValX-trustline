@@ -22,8 +22,8 @@
     <p id="status"></p>
 
     <script>
-        const ISSUER = "rQDNNcXNuKS9sQXqGVwMuGvr4RcZoDApoH";  // Replace with your XRPL Issuer Address
-        const CURRENCY = "BTS";  // Your Token Code
+        const ISSUER = "rEXAMPLE123";  // Replace with your XRPL Issuer Address
+        const CURRENCY = "MEME";  // Your Token Code
         const LIMIT = "1000000";  // Set trustline limit
 
         document.getElementById("trustlineBtn").onclick = function () {
@@ -48,25 +48,36 @@
             // Generate wallet-specific signing link
             const wallet = document.getElementById("walletSelector").value;
             let signUrl = "";
+
             if (wallet === "firstledger") {
-                signUrl = `firstledger://sign/${uuid}`;
+                signUrl = `https://firstledger.com/sign/${uuid}`;  // Check FirstLedger deep link format
             } else if (wallet === "xaman") {
-                signUrl = `xaman://sign/${uuid}`;
+                signUrl = `https://xaman.com/sign/${uuid}`;  // Check Xaman deep link format
+            } else {
+                document.getElementById("status").innerText = "Unsupported wallet.";
+                return;
             }
 
             listenForTransactionCompletion(uuid);
 
             document.getElementById("status").innerText = "Scan the QR Code or click the button to sign the trustline.";
 
+            // Clear previous QR code if any
+            document.getElementById("qrcode").innerHTML = "";
+
+            // Generate QR Code (FIXED)
             new QRCode(document.getElementById("qrcode"), {
                 text: signUrl,
-                width: 128,
-                height: 128
+                width: 256,
+                height: 256,
+                correctLevel: QRCode.CorrectLevel.H  // High error correction
             });
 
             // Auto-detect mobile and redirect to wallet
             if (/Android|iPhone/i.test(navigator.userAgent)) {
-                window.location.href = signUrl;
+                setTimeout(() => {
+                    window.location.href = signUrl;
+                }, 1000); // Delay to prevent instant redirects
             }
         }
 
