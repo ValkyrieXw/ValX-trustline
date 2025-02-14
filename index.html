@@ -1,115 +1,58 @@
+<!-- trustline.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set Trustline for VALX</title>
+    <title>Set Trust Line - Xaman Wallet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #qrcode {
+            margin: 20px auto;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
+    <h2>Set Trust Line for VLX Token</h2>
+    <p>Issuer Address: <strong>r39Fenk9hS7FBZyU3niQTqRTC3EY43VjZL</strong></p>
+    <p>Token Code: <strong>VLX</strong></p>
 
-    <h2>Set Trustline for MEME Token</h2>
-    <p>Click the button or scan the QR code to set a trustline in your wallet.</p>
-
-    <label for="walletSelector">Choose Wallet:</label>
-    <select id="walletSelector">
-        <option value="firstledger">FirstLedger Wallet</option>
-        <option value="xaman">Xaman Wallet</option>
-    </select>
-    
-    <button id="trustlineBtn">Set Trustline</button>
     <div id="qrcode"></div>
-    <p id="status"></p>
+
+    <button id="xamanButton">Open in Xaman Wallet</button>
 
     <script>
-        const ISSUER = "r39Fenk9hS7FBZyU3niQTqRTC3EY43VjZL";  // Replace with your XRPL Issuer Address
-        const CURRENCY = "VLX";  // Your Token Code
-        const LIMIT = "1000000";  // Set trustline limit
+        const issuer = "r39Fenk9hS7FBZyU3niQTqRTC3EY43VjZL";
+        const token = "VLX";
+        const xamanUrl = `xaman://trust?issuer=${issuer}&currency=${token}`;
 
-        document.getElementById("trustlineBtn").onclick = function () {
-            createTrustline();
-        };
+        // Generate QR Code
+        new QRCode(document.getElementById("qrcode"), {
+            text: xamanUrl,
+            width: 200,
+            height: 200
+        });
 
-        function createTrustline() {
-            const payload = {
-                txjson: {
-                    TransactionType: "TrustSet",
-                    LimitAmount: {
-                        currency: CURRENCY,
-                        issuer: ISSUER,
-                        value: LIMIT
-                    }
-                }
-            };
-
-            // Generate a random UUID for tracking
-            const uuid = crypto.randomUUID(); 
-
-            // Generate wallet-specific signing link
-            const wallet = document.getElementById("walletSelector").value;
-            let signUrl = "";
-
-            if (wallet === "firstledger") {
-                signUrl = `https://firstledger.com/sign/${uuid}`;  // Check FirstLedger deep link format
-            } else if (wallet === "xaman") {
-                signUrl = `https://xaman.com/sign/${uuid}`;  // Check Xaman deep link format
-            } else {
-                document.getElementById("status").innerText = "Unsupported wallet.";
-                return;
-            }
-
-            listenForTransactionCompletion(uuid);
-
-            document.getElementById("status").innerText = "Scan the QR Code or click the button to sign the trustline.";
-
-            // Clear previous QR code if any
-            document.getElementById("qrcode").innerHTML = "";
-
-            // Generate QR Code (FIXED)
-            new QRCode(document.getElementById("qrcode"), {
-                text: signUrl,
-                width: 256,
-                height: 256,
-                correctLevel: QRCode.CorrectLevel.H  // High error correction
-            });
-
-            // Auto-detect mobile and redirect to wallet
-            if (/Android|iPhone/i.test(navigator.userAgent)) {
-                setTimeout(() => {
-                    window.location.href = signUrl;
-                }, 1000); // Delay to prevent instant redirects
-            }
-        }
-
-        function listenForTransactionCompletion(uuid) {
-            const socket = new WebSocket("wss://xrpl-tracking-service.com/ws"); // Replace with actual XRPL WebSocket URL
-
-            socket.onopen = function () {
-                console.log("Connected to XRPL WebSocket");
-                socket.send(JSON.stringify({ uuid: uuid }));
-            };
-
-            socket.onmessage = function (event) {
-                const data = JSON.parse(event.data);
-                if (data.signed) {
-                    document.getElementById("status").innerText = "Trustline successfully set!";
-                    socket.close();
-                } else if (data.rejected) {
-                    document.getElementById("status").innerText = "Trustline signing was rejected.";
-                    socket.close();
-                }
-            };
-
-            socket.onerror = function (error) {
-                console.error("WebSocket Error:", error);
-                document.getElementById("status").innerText = "Error listening for transaction updates.";
-            };
-
-            socket.onclose = function () {
-                console.log("WebSocket connection closed");
-            };
-        }
+        // Open Xaman Wallet on Button Click
+        document.getElementById("xamanButton").addEventListener("click", () => {
+            window.location.href = xamanUrl;
+        });
     </script>
-
 </body>
 </html>
