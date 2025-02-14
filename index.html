@@ -1,4 +1,3 @@
-<!-- trustset.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,29 +37,33 @@
     <button id="xamanButton">Open in Xaman Wallet</button>
 
     <script>
-        // Define TrustSet Transaction
+        const issuer = "r39Fenk9hS7FBZyU3niQTqRTC3EY43VjZL";
+        const currency = "VLX";
+        const limit = "1000000000"; // 1 billion VLX (adjustable)
+
+        // Construct a valid TrustSet transaction
         const trustSetTx = {
             "TransactionType": "TrustSet",
-            "Account": "", // User's XRP wallet address (filled in Xaman)
+            "Account": "",  // Will be set by the wallet
             "LimitAmount": {
-                "currency": "VLX",
-                "issuer": "r39Fenk9hS7FBZyU3niQTqRTC3EY43VjZL",
-                "value": "1000000000"  // Large enough limit
+                "currency": currency,
+                "issuer": issuer,
+                "value": limit
             },
-            "Flags": 131072  // Enable Rippling
+            "Flags": 131072  // tfSetNoRipple (0x00020000) to prevent rippling
         };
 
-        // Encode JSON to URI format for Xaman
-        const xamanTxUrl = `xaman://sign?txjson=${encodeURIComponent(JSON.stringify(trustSetTx))}`;
+        // Encode it for Xaman
+        const xamanTxUrl = `xaman://transaction?json=${encodeURIComponent(JSON.stringify(trustSetTx))}`;
 
-        // Generate QR Code for Xaman
+        // Generate QR Code
         new QRCode(document.getElementById("qrcode"), {
             text: xamanTxUrl,
             width: 200,
             height: 200
         });
 
-        // Open Xaman Wallet on Button Click
+        // Button to open Xaman Wallet
         document.getElementById("xamanButton").addEventListener("click", () => {
             window.location.href = xamanTxUrl;
         });
