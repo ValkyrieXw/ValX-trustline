@@ -1,4 +1,4 @@
-<!-- trustline.html -->
+<!-- trustset.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,20 +38,31 @@
     <button id="xamanButton">Open in Xaman Wallet</button>
 
     <script>
-        const issuer = "r39Fenk9hS7FBZyU3niQTqRTC3EY43VjZL";
-        const token = "VLX";
-        const xamanUrl = `xaman://trust?issuer=${issuer}&currency=${token}`;
+        // Define TrustSet Transaction
+        const trustSetTx = {
+            "TransactionType": "TrustSet",
+            "Account": "", // User's XRP wallet address (filled in Xaman)
+            "LimitAmount": {
+                "currency": "VLX",
+                "issuer": "r39Fenk9hS7FBZyU3niQTqRTC3EY43VjZL",
+                "value": "1000000000"  // Large enough limit
+            },
+            "Flags": 131072  // Enable Rippling
+        };
 
-        // Generate QR Code
+        // Encode JSON to URI format for Xaman
+        const xamanTxUrl = `xaman://sign?txjson=${encodeURIComponent(JSON.stringify(trustSetTx))}`;
+
+        // Generate QR Code for Xaman
         new QRCode(document.getElementById("qrcode"), {
-            text: xamanUrl,
+            text: xamanTxUrl,
             width: 200,
             height: 200
         });
 
         // Open Xaman Wallet on Button Click
         document.getElementById("xamanButton").addEventListener("click", () => {
-            window.location.href = xamanUrl;
+            window.location.href = xamanTxUrl;
         });
     </script>
 </body>
